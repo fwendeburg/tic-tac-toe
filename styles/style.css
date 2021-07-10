@@ -1,0 +1,79 @@
+body {
+    font-family: 'Varela Round', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+h1 {
+    font-size: 40px;
+    color: white;
+}
+
+nav {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #000C66;
+    border-bottom: 4px solid #050A30;
+}
+
+footer {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #7EC8E3;
+    border-top: 4px solid #050A30;
+}
+
+.board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    min-height: 300px;
+    min-width: 300px;
+    width: 25vw;
+    height: 25vw;
+    border: 3px solid #050A30;
+    grid-row-gap: 2px;
+    grid-column-gap: 2px;
+    background-color: #050A30;
+}
+
+.tile {
+    font-size: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #75E6DA;
+}
+
+.tile:hover {
+    background-color: #1C9B8E;
+    cursor: pointer;
+}
+
+.restart {
+    margin-top: 40px;
+    height: 40px;
+    width: 150px;
+}
+
+.player-turn {
+    font-size: 28px;
+    margin-bottom: 22px;
+}
