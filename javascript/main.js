@@ -42,6 +42,7 @@ const GameBoard = (function() {
 
 const DisplayController = (function() {
     const _tiles = document.querySelectorAll('.tile');
+    const gameInfo = document.querySelector('.game-info'); 
 
     const displayAllBoard = (board) => {
         let counter = 0;
@@ -63,11 +64,23 @@ const DisplayController = (function() {
         } 
     }
 
-    const showWinner = (symbol) => {
-        alert(`${symbol} has won`)
+    const updateGameInfo = (text) => {
+        gameInfo.textContent = text;
     }
 
-    return {displayAllBoard, displayBoardElement, showWinner};
+    const toggleGameInfoClass = (cssClass, action) => {
+        if (action === 'toggle') {
+            gameInfo.classList.toggle(cssClass);
+        }
+        else if (action === 'add') {
+            gameInfo.classList.add(cssClass);
+        }
+        else if (action === 'remove') {
+            gameInfo.classList.remove(cssClass);
+        }
+    }
+
+    return {displayAllBoard, displayBoardElement, updateGameInfo, toggleGameInfoClass};
 })()
 
 const Player = (symbol) => {
@@ -98,12 +111,20 @@ const GameFlow = (function() {
     function restartGame() {
         GameBoard.resetBoard();
         DisplayController.displayAllBoard(GameBoard.getBoard());
+
+        playerNextTurn = playerOne.getPlayer();
+        playerPastTurn = '';
+        winner = '';
+
+        DisplayController.toggleGameInfoClass('show-tie', 'remove');
+        DisplayController.toggleGameInfoClass('show-winner', 'remove');
+        DisplayController.updateGameInfo(`Player ${playerNextTurn}'s turn`);
     }
 
     function getPlayerMovement(e) {
         let ij = e.target.id.split('');
 
-        if (!GameBoard.isPositionOcupied(ij[0], ij[1])) {
+        if (!GameBoard.isPositionOcupied(ij[0], ij[1]) && winner == '') {
             GameBoard.populateBoard(ij[0], ij[1], playerNextTurn);
             DisplayController.displayBoardElement(ij[0], ij[1], playerNextTurn);
 
@@ -114,21 +135,13 @@ const GameFlow = (function() {
             checkWinVertical(playerPastTurn)) winner = playerPastTurn;
     
         if (winner != '') {
-            DisplayController.showWinner(playerPastTurn);
-            restartGame();
+            DisplayController.updateGameInfo(`${playerPastTurn} won the game`);
+            DisplayController.toggleGameInfoClass('show-winner', 'add');
         }
         else if (GameBoard.isBoardComplete()) {
-            alert("itsa tie!")
+            DisplayController.updateGameInfo('It´s a draw!');
+            DisplayController.toggleGameInfoClass('show-tie', 'add');
         }
-    }
-
-    function restartGame() {
-        GameBoard.resetBoard();
-        DisplayController.displayAllBoard(GameBoard.getBoard());
-
-        playerNextTurn = playerOne.getPlayer();
-        playerPastTurn = '';
-        winner = '';
     }
 
     function changePlayerTurn() {
@@ -140,6 +153,8 @@ const GameFlow = (function() {
         else {
             playerNextTurn = playerOne.getPlayer();
         }
+
+        DisplayController.updateGameInfo(`Player ${playerNextTurn}'s turn`);
     }
 
     function checkWinDiagonal(player) {

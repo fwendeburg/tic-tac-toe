@@ -73,7 +73,31 @@ footer {
     width: 150px;
 }
 
-.player-turn {
+.game-info {
     font-size: 28px;
     margin-bottom: 22px;
+}
+
+.show-winner {
+    color: green;
+}
+
+.show-winner::after {
+    content: ' <<';
+}
+
+.show-winner::before {
+    content: '>> ';
+}
+
+.show-tie {
+    color: rgb(167, 154, 42);
+}
+
+.show-tie::after {
+    content: ' <<';
+}
+
+.show-tie::before {
+    content: '>> ';
 }
