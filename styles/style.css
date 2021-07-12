@@ -44,8 +44,8 @@ footer {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    min-height: 300px;
-    min-width: 300px;
+    min-height: 250px;
+    min-width: 250px;
     width: 25vw;
     height: 25vw;
     border: 3px solid #050A30;
