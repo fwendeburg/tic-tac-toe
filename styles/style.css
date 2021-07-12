@@ -101,3 +101,9 @@ footer {
 .show-tie::before {
     content: '>> ';
 }
+
+@media (max-width: 510px) {
+    .tile {
+        font-size: 46px;
+    }
+}
