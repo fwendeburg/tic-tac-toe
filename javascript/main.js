@@ -41,8 +41,64 @@ const GameBoard = (function() {
 })()
 
 const DisplayController = (function() {
+    let selectedPlayers = [];
+
+    const boardContainer = document.querySelector('.board-container');
+    const playerMenu = document.querySelector('.menu-wrapper');
     const _tiles = document.querySelectorAll('.tile');
-    const gameInfo = document.querySelector('.game-info'); 
+    const gameInfo = document.querySelector('.game-info');
+
+    const playerOneSelectBtn = document.querySelectorAll('.player1');
+    playerOneSelectBtn.forEach(btn => btn.addEventListener('click', function(e) {
+        showPlayerSelection(e.target, playerOneSelectBtn);
+    }));
+
+    const playerTwoSelectBtn = document.querySelectorAll('.player2');
+    playerTwoSelectBtn.forEach(btn => btn.addEventListener('click', function(e) {
+        showPlayerSelection(e.target, playerTwoSelectBtn);
+    }));
+
+    const startGameBtn = document.querySelector('#start');
+    startGameBtn.addEventListener('click', getPlayerSelection);
+
+    const openPlayerSelec = document.querySelector('#open-player-selection');
+    openPlayerSelec.addEventListener('click', openSelectionMenu);
+
+    function openSelectionMenu(e) {
+        boardContainer.classList.add('hidden');
+        playerMenu.classList.remove('hidden');
+    }
+
+    function getPlayerSelection() {
+        selectedPlayers = [];
+
+        for (let i = 0; i < playerOneSelectBtn.length; i++) {
+            if (playerOneSelectBtn[i].classList.contains('selected-player')) {
+                selectedPlayers.push(playerOneSelectBtn[i].id);
+            }
+        }
+
+        for (i = 0; i < playerTwoSelectBtn.length; i++) {
+            if (playerTwoSelectBtn[i].classList.contains('selected-player')) {
+                selectedPlayers.push(playerTwoSelectBtn[i].id);
+            }
+        }
+
+        playerMenu.classList.add('hidden');
+        boardContainer.classList.remove('hidden');
+
+        GameFlow.restartGame();
+    }
+     
+    function showPlayerSelection(selectedBtn, btnNodeList) {
+        for (let i = 0; i < btnNodeList.length; i++) {
+            if (btnNodeList[i].classList.contains('selected-player')) {
+                btnNodeList[i].classList.remove('selected-player');
+            }
+        }
+
+       selectedBtn.classList.add('selected-player');
+    }
 
     const displayAllBoard = (board) => {
         let counter = 0;
@@ -102,11 +158,12 @@ const GameFlow = (function() {
     let playerPastTurn = '';
     let winner = '';
 
-    const _resetBoardBtn = document.querySelector('.restart');
+    const _resetBoardBtn = document.querySelector('#restart');
     _resetBoardBtn.addEventListener('click', restartGame);
 
     const _tiles = document.querySelectorAll('.tile');
     _tiles.forEach(tile => tile.addEventListener('click', getPlayerMovement));
+
 
     function restartGame() {
         GameBoard.resetBoard();
@@ -214,4 +271,6 @@ const GameFlow = (function() {
 
         return isThereWinner;
     }
+
+    return {restartGame};
 })()

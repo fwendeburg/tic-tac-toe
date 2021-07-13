@@ -48,8 +48,8 @@ footer {
     min-width: 250px;
     max-height: 400px;
     max-width: 400px;
-    width: 30vw;
-    height: 30vw;
+    width: 50vw;
+    height: 50vw;
     border: 3px solid #050A30;
     grid-row-gap: 2px;
     grid-column-gap: 2px;
@@ -72,10 +72,6 @@ footer {
 .game-ctrl-btn {
     height: 40px;
     width: 150px;
-}
-
-#restart {
-    margin-top: 40px;
 }
 
 .game-info {
@@ -165,6 +161,15 @@ footer {
     display: none;
 }
 
+.buttons {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row;
+    width: 100%;
+}
+
 @media (max-width: 510px) {
     .tile {
         font-size: 46px;
@@ -172,6 +177,11 @@ footer {
 
     .game-menu {
         height: max-content;
+    }
+
+    .buttons button {
+        width: 100px;
+        height: 54px;
     }
 }
 

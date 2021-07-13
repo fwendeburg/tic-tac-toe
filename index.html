@@ -24,23 +24,23 @@
             <div class="game-menu">
                 <div>
                     <p>Choose Player 1</p>
-                    <button id="hplayer1" class="selected-player">Human</button>
-                    <button id="beplayer1">Bot (Easy)</button>
-                    <button id="bhplayer1">Bot (Hard)</button>
+                    <button id="hplayer1" class="selected-player player1">Human</button>
+                    <button id="beplayer1" class="player1">Bot (Easy)</button>
+                    <button id="bhplayer1" class="player1">Bot (Hard)</button>
                 </div>
                 <hr>
                 <div>
                     <p>Choose Player 2</p>
-                    <button id="hplayer2" class="selected-player">Human</button>
-                    <button id="beplayer2">Bot (Easy)</button>
-                    <button id="bhplayer2">Bot (Hard)</button>
+                    <button id="hplayer2" class="selected-player player2">Human</button>
+                    <button id="beplayer2" class="player2">Bot (Easy)</button>
+                    <button id="bhplayer2" class="player2">Bot (Hard)</button>
                 </div>
             </div>
             <button id="start" class="game-ctrl-btn">Start Game</button>
         </div>
 
         <div class="board-container hidden">
-            <p class="game-info hidden">Player X's turn</p>
+            <p class="game-info">Player X's turn</p>
 
             <div class="board">
                 <div id="00" class="tile"></div>
@@ -54,7 +54,10 @@
                 <div id="22" class="tile"></div>
             </div>
 
-            <button id="restart" class="game-ctrl-btn hidden">Restart Game</button>
+            <div class="buttons">
+                <button id="restart" class="game-ctrl-btn">Restart Game</button>
+                <button id="open-player-selection" class="game-ctrl-btn">Menu</button>
+            </div>
         </div>
 
         <footer>
