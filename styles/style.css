@@ -179,6 +179,10 @@ footer {
         height: max-content;
     }
 
+    .buttons {
+        width: min(100%, 250px);
+    }
+
     .buttons button {
         width: 100px;
         height: 54px;
