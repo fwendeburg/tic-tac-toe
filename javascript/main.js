@@ -89,6 +89,10 @@ const DisplayController = (function() {
 
         GameFlow.restartGame();
     }
+
+    function getSelectedPlayers() {
+        return selectedPlayers;
+    }
      
     function showPlayerSelection(selectedBtn, btnNodeList) {
         for (let i = 0; i < btnNodeList.length; i++) {
@@ -136,7 +140,8 @@ const DisplayController = (function() {
         }
     }
 
-    return {displayAllBoard, displayBoardElement, updateGameInfo, toggleGameInfoClass};
+    return {displayAllBoard, displayBoardElement, updateGameInfo,
+            toggleGameInfoClass, getSelectedPlayers};
 })()
 
 const Player = (symbol) => {
@@ -273,4 +278,25 @@ const GameFlow = (function() {
     }
 
     return {restartGame};
+})()
+
+const Bot = (function() {
+    const easyBotPlay = () => {
+        let isPosValid = false;
+        let posI;
+        let posJ;
+
+        while(!isPosValid) {
+            posI = Math.floor(Math.random() * 3);
+            posJ = Math.floor(Math.random() * 3);
+
+            if (!GameBoard.isPositionOcupied(posI, posJ)) {
+                isPosValid = true;
+            }
+        }
+        
+        return [posI, posJ];
+    }
+
+    return {easyBotPlay}
 })()
