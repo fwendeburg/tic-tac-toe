@@ -59,6 +59,14 @@ const DisplayController = (function() {
     const openPlayerSelec = document.querySelector('#open-player-selection');
     openPlayerSelec.addEventListener('click', openSelectionMenu);
 
+    const disableTiles = () => {
+        _tiles.forEach(tile => tile.classList.add('disabled'));
+    }
+
+    const enableTiles = () => {
+        _tiles.forEach(tile => tile.classList.remove('disabled'));  
+    }
+
     function openSelectionMenu() {
         boardContainer.classList.add('hidden');
         playerMenu.classList.remove('hidden');
@@ -116,7 +124,7 @@ const DisplayController = (function() {
     }
 
     return {displayAllBoard, displayBoardElement, updateGameInfo,
-            toggleGameInfoClass, togglePlayerMenu};
+            toggleGameInfoClass, togglePlayerMenu, disableTiles, enableTiles};
 })()
 
 const Player = (name, symbol) => {
@@ -138,6 +146,7 @@ const Player = (name, symbol) => {
 }
 
 const GameFlow = (function() {
+    let currentPlayerSymbol = 'X';
     let playerOne;
     let playerTwo;
     let playerOneTurn = true;
@@ -147,7 +156,6 @@ const GameFlow = (function() {
     _resetBoardBtn.addEventListener('click', restartGame);
 
     const _tiles = document.querySelectorAll('.tile');
-    _tiles.forEach(tile => tile.addEventListener('click', getPlayerMovement));
 
     const startGameBtn = document.querySelector('#start');
     const playerOneSelectBtn = document.querySelectorAll('.player1');
@@ -167,39 +175,48 @@ const GameFlow = (function() {
             }
         }
 
-        DisplayController.togglePlayerMenu();
-
-        GameFlow.restartGame();
-    }
-
-    function restartGame() {
-        GameBoard.resetBoard();
-        DisplayController.displayAllBoard(GameBoard.getBoard());
-
-        playerOneTurn = true;
-        winner = '';
-
-        DisplayController.toggleGameInfoClass('show-tie', 'remove');
-        DisplayController.toggleGameInfoClass('show-winner', 'remove');
-        DisplayController.updateGameInfo(`Player ${playerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol()
-            }'s turn`);
-    }
-
-    function getPlayerMovement(e) {
-        let ij = e.target.id.split('');
-
-        if (!GameBoard.isPositionOcupied(ij[0], ij[1]) && winner == '') {
-            GameBoard.populateBoard(ij[0], ij[1], playerNextTurn);
-            DisplayController.displayBoardElement(ij[0], ij[1], playerNextTurn);
-
-            changePlayerTurn();
+        if (playerOne.getName() == 'human1' || playerTwo.getName() == 'human2') {
+            _tiles.forEach(tile => tile.addEventListener('click', getPlayerMovement));
+            DisplayController.disableTiles;
         }
 
-        if (checkWinDiagonal(playerPastTurn) || checkWinHorizontal(playerPastTurn) ||
-            checkWinVertical(playerPastTurn)) winner = playerPastTurn;
+        DisplayController.togglePlayerMenu();
+        restartGame();
+        playGame();
+    }
+
+    function playGame() {
+        console.log("here")
+        DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
+
+        if (checkWinDiagonal(currentPlayerSymbol) || checkWinHorizontal(currentPlayerSymbol) ||
+        checkWinVertical(currentPlayerSymbol)) winner = currentPlayerSymbol;
+
+        if (winner == '' && !GameBoard.isBoardComplete()) {
+            if (playerOneTurn) {
+                if (playerOne.getName() == 'human1') {
+                    DisplayController.enableTiles();
+                }
+                else if (playerOne.getName() == 'boteasy1') {
+                    Bot.easyBotPlay();
+                }
+
+            }
+            else {
+                if (playerTwo.getName() == 'human2') {
+                    DisplayController.enableTiles();
+                }
+                else if (playerTwo.getName() == 'boteasy2') {
+                    Bot.easyBotPlay();
+                }
+            }
+    
+            currentPlayerSymbol = playerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol();
+            DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
+        }
     
         if (winner != '') {
-            DisplayController.updateGameInfo(`${playerPastTurn} won the game`);
+            DisplayController.updateGameInfo(`${winner} won the game`);
             DisplayController.toggleGameInfoClass('show-winner', 'add');
         }
         else if (GameBoard.isBoardComplete()) {
@@ -208,17 +225,36 @@ const GameFlow = (function() {
         }
     }
 
-    function changePlayerTurn() {
-        playerPastTurn = playerNextTurn;
+    function restartGame() {
+        GameBoard.resetBoard();
+        DisplayController.displayAllBoard(GameBoard.getBoard());
 
-        if (playerPastTurn === playerOne.getPlayer()) {
-            playerNextTurn = playerTwo.getPlayer();
-        }
-        else {
-            playerNextTurn = playerOne.getPlayer();
+        playerOneTurn = true;
+        winner = '';
+        currentPlayerSymbol = 'X';
+
+        DisplayController.toggleGameInfoClass('show-tie', 'remove');
+        DisplayController.toggleGameInfoClass('show-winner', 'remove');
+        DisplayController.updateGameInfo(`Player ${playerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol()
+            }'s turn`);
+
+        playGame();
+    }
+
+    function getPlayerMovement(e) {
+        let ij = e.target.id.split('');
+
+        if (!GameBoard.isPositionOcupied(ij[0], ij[1]) && winner == '') {
+            GameBoard.populateBoard(ij[0], ij[1], `${playerOneTurn? playerOne.getSymbol() :
+                playerTwo.getSymbol()}`);
+            DisplayController.displayBoardElement(ij[0], ij[1], `${playerOneTurn? playerOne.getSymbol() :
+                playerTwo.getSymbol()}`);
+
+                playerOneTurn = !playerOneTurn;
+                DisplayController.disableTiles;
         }
 
-        DisplayController.updateGameInfo(`Player ${playerNextTurn}'s turn`);
+        playGame();
     }
 
     function checkWinDiagonal(player) {
@@ -279,11 +315,34 @@ const GameFlow = (function() {
         return isThereWinner;
     }
 
-    return {restartGame};
+    const getWinner = () => {
+        return winner;
+    }
+
+    const getPlayerOne = () => {
+        return playerOne;
+    }
+
+    const getPlayerTwo = () => {
+        return playerTwo;
+    }
+
+    const getPlayerOneTurn = () => {
+        return playerOneTurn;
+    }
+
+    const togglePlayerOneTurn = () => {
+        playerOneTurn = !playerOneTurn;
+    }
+
+    return {restartGame, getWinner, getPlayerOne, getPlayerTwo, getPlayerOneTurn, playGame, togglePlayerOneTurn};
 })()
 
 const Bot = (function() {
     const easyBotPlay = () => {
+        let playerOne = GameFlow.getPlayerOne();
+        let playerTwo = GameFlow.getPlayerTwo();
+        let playerOneTurn = GameFlow.getPlayerOneTurn();
         let isPosValid = false;
         let posI;
         let posJ;
@@ -296,8 +355,16 @@ const Bot = (function() {
                 isPosValid = true;
             }
         }
-        
-        return [posI, posJ];
+
+        if (GameFlow.getWinner() == '') {
+            GameBoard.populateBoard(posI, posJ, `${playerOneTurn? playerOne.getSymbol() :
+                playerTwo.getSymbol()}`);
+            DisplayController.displayBoardElement(posI, posJ, `${playerOneTurn? playerOne.getSymbol() :
+                playerTwo.getSymbol()}`);
+
+            GameFlow.togglePlayerOneTurn()
+            GameFlow.playGame();
+        }
     }
 
     return {easyBotPlay}

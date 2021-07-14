@@ -64,7 +64,7 @@ footer {
     background-color: #75E6DA;
 }
 
-.tile:hover {
+.tile:hover:not(.disabled) {
     background-color: #1C9B8E;
     cursor: pointer;
 }
