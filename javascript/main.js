@@ -41,8 +41,6 @@ const GameBoard = (function() {
 })()
 
 const DisplayController = (function() {
-    let selectedPlayers = [];
-
     const boardContainer = document.querySelector('.board-container');
     const playerMenu = document.querySelector('.menu-wrapper');
     const _tiles = document.querySelectorAll('.tile');
@@ -58,40 +56,12 @@ const DisplayController = (function() {
         showPlayerSelection(e.target, playerTwoSelectBtn);
     }));
 
-    const startGameBtn = document.querySelector('#start');
-    startGameBtn.addEventListener('click', getPlayerSelection);
-
     const openPlayerSelec = document.querySelector('#open-player-selection');
     openPlayerSelec.addEventListener('click', openSelectionMenu);
 
-    function openSelectionMenu(e) {
+    function openSelectionMenu() {
         boardContainer.classList.add('hidden');
         playerMenu.classList.remove('hidden');
-    }
-
-    function getPlayerSelection() {
-        selectedPlayers = [];
-
-        for (let i = 0; i < playerOneSelectBtn.length; i++) {
-            if (playerOneSelectBtn[i].classList.contains('selected-player')) {
-                selectedPlayers.push(playerOneSelectBtn[i].id);
-            }
-        }
-
-        for (i = 0; i < playerTwoSelectBtn.length; i++) {
-            if (playerTwoSelectBtn[i].classList.contains('selected-player')) {
-                selectedPlayers.push(playerTwoSelectBtn[i].id);
-            }
-        }
-
-        playerMenu.classList.add('hidden');
-        boardContainer.classList.remove('hidden');
-
-        GameFlow.restartGame();
-    }
-
-    function getSelectedPlayers() {
-        return selectedPlayers;
     }
      
     function showPlayerSelection(selectedBtn, btnNodeList) {
@@ -140,27 +110,37 @@ const DisplayController = (function() {
         }
     }
 
+    const togglePlayerMenu = () => {
+        playerMenu.classList.add('hidden');
+        boardContainer.classList.remove('hidden');
+    }
+
     return {displayAllBoard, displayBoardElement, updateGameInfo,
-            toggleGameInfoClass, getSelectedPlayers};
+            toggleGameInfoClass, togglePlayerMenu};
 })()
 
-const Player = (symbol) => {
+const Player = (name, symbol) => {
     let playerSymbol = symbol;
+    let playerName = name;
 
-    const getPlayer = () => {
+    const getSymbol = () => {
         return playerSymbol;
     }
 
+    const getName = () => {
+        return playerName;
+    }
+
     return {
-        getPlayer
+        getSymbol,
+        getName
     }
 }
 
 const GameFlow = (function() {
-    let playerOne = Player('X');
-    let playerTwo = Player('O');
-    let playerNextTurn = playerOne.getPlayer();
-    let playerPastTurn = '';
+    let playerOne;
+    let playerTwo;
+    let playerOneTurn = true;
     let winner = '';
 
     const _resetBoardBtn = document.querySelector('#restart');
@@ -169,18 +149,40 @@ const GameFlow = (function() {
     const _tiles = document.querySelectorAll('.tile');
     _tiles.forEach(tile => tile.addEventListener('click', getPlayerMovement));
 
+    const startGameBtn = document.querySelector('#start');
+    const playerOneSelectBtn = document.querySelectorAll('.player1');
+    const playerTwoSelectBtn = document.querySelectorAll('.player2');
+    startGameBtn.addEventListener('click', getPlayerSelection);
+
+    function getPlayerSelection() {
+        for (let i = 0; i < playerOneSelectBtn.length; i++) {
+            if (playerOneSelectBtn[i].classList.contains('selected-player')) {
+                playerOne = Player(playerOneSelectBtn[i].id, 'X');
+            }
+        }
+
+        for (i = 0; i < playerTwoSelectBtn.length; i++) {
+            if (playerTwoSelectBtn[i].classList.contains('selected-player')) {
+                playerTwo = Player(playerTwoSelectBtn[i].id, 'O');
+            }
+        }
+
+        DisplayController.togglePlayerMenu();
+
+        GameFlow.restartGame();
+    }
 
     function restartGame() {
         GameBoard.resetBoard();
         DisplayController.displayAllBoard(GameBoard.getBoard());
 
-        playerNextTurn = playerOne.getPlayer();
-        playerPastTurn = '';
+        playerOneTurn = true;
         winner = '';
 
         DisplayController.toggleGameInfoClass('show-tie', 'remove');
         DisplayController.toggleGameInfoClass('show-winner', 'remove');
-        DisplayController.updateGameInfo(`Player ${playerNextTurn}'s turn`);
+        DisplayController.updateGameInfo(`Player ${playerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol()
+            }'s turn`);
     }
 
     function getPlayerMovement(e) {
