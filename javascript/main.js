@@ -146,7 +146,7 @@ const Player = (name, symbol) => {
 }
 
 const GameFlow = (function() {
-    let currentPlayerSymbol = 'X';
+    let currentPlayerSymbol;
     let playerOne;
     let playerTwo;
     let playerOneTurn = true;
@@ -177,8 +177,10 @@ const GameFlow = (function() {
 
         if (playerOne.getName() == 'human1' || playerTwo.getName() == 'human2') {
             _tiles.forEach(tile => tile.addEventListener('click', getPlayerMovement));
-            DisplayController.disableTiles;
+            DisplayController.disableTiles();
         }
+
+        currentPlayerSymbol = playerOne.getSymbol();
 
         DisplayController.togglePlayerMenu();
         restartGame();
@@ -186,11 +188,11 @@ const GameFlow = (function() {
     }
 
     function playGame() {
-        console.log("here")
         DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
+        let pastPlayerSymbol = playerOneTurn? playerTwo.getSymbol() : playerOne.getSymbol();
 
-        if (checkWinDiagonal(currentPlayerSymbol) || checkWinHorizontal(currentPlayerSymbol) ||
-        checkWinVertical(currentPlayerSymbol)) winner = currentPlayerSymbol;
+        if (checkWinDiagonal(pastPlayerSymbol) || checkWinHorizontal(pastPlayerSymbol) ||
+        checkWinVertical(pastPlayerSymbol)) winner = pastPlayerSymbol;
 
         if (winner == '' && !GameBoard.isBoardComplete()) {
             if (playerOneTurn) {
@@ -219,7 +221,7 @@ const GameFlow = (function() {
             DisplayController.updateGameInfo(`${winner} won the game`);
             DisplayController.toggleGameInfoClass('show-winner', 'add');
         }
-        else if (GameBoard.isBoardComplete()) {
+        else if (GameBoard.isBoardComplete() && winner == '') {
             DisplayController.updateGameInfo('It´s a draw!');
             DisplayController.toggleGameInfoClass('show-tie', 'add');
         }
