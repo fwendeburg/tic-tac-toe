@@ -279,8 +279,6 @@ const GameFlow = (function() {
         }
 
         if (gameStatus == null) {
-            DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
-
             if (isPlayerOneTurn) {
                 if (playerOne.getName() == 'human1') {
                     DisplayController.enableTiles();
