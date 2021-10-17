@@ -231,7 +231,6 @@ const GameFlow = (function() {
     let gameBoard = GameBoard();
     let playerOne, playerTwo;
     let isPlayerOneTurn = true;
-    let currentPlayerSymbol;
     let winner = '';
 
     const resetBoardBtn = document.querySelector('#restart');
@@ -262,8 +261,6 @@ const GameFlow = (function() {
             DisplayController.disableTiles();
         }
 
-        currentPlayerSymbol = playerOne.getSymbol();
-
         DisplayController.togglePlayerMenu();
         restartGame();
     }
@@ -271,8 +268,7 @@ const GameFlow = (function() {
     function playGame() {
         let gameStatus = gameBoard.getStatus(playerOne, playerTwo);
 
-        currentPlayerSymbol = isPlayerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol();
-        DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
+        DisplayController.updateGameInfo(`Player ${isPlayerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol()}'s turn`);
 
         if (gameStatus == null) {
             if (isPlayerOneTurn) {
@@ -315,7 +311,6 @@ const GameFlow = (function() {
 
         isPlayerOneTurn = true;
         winner = '';
-        currentPlayerSymbol = playerOne.getSymbol();
 
         DisplayController.toggleGameInfoClass('show-tie', 'remove');
         DisplayController.toggleGameInfoClass('show-winner', 'remove');
