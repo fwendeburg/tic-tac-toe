@@ -418,7 +418,7 @@ const Bot = (function() {
     
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {   
-                if (!gameBoard.isPositionOcupied(i, j)) {
+                if (!board.isPositionOcupied(i, j)) {
                     if (isMaxPlayer) {
                         let score = minimax(board, depth + 1, false);
                         bestScore = max(score, bestScore);
@@ -467,8 +467,6 @@ const Bot = (function() {
                             posJ = j;
                         }
                     }
-                    
-                    boardCopy.removeSymbol(i, j);
                 }
             }
         }
