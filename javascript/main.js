@@ -301,14 +301,17 @@ const GameFlow = (function() {
             }
     
             currentPlayerSymbol = isPlayerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol();
-            DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
+
+            if (gameBoard.getStatus(playerOne, playerTwo) != 0) {
+                DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
+            }
         }
     
         if (winner != '') {
             DisplayController.updateGameInfo(`${winner} won the game`);
             DisplayController.toggleGameInfoClass('show-winner', 'add');
         }
-        else if (gameStatus == 0 && winner == '') {
+        else if (gameStatus == 0) {
             DisplayController.updateGameInfo('It´s a draw!');
             DisplayController.toggleGameInfoClass('show-tie', 'add');
         }
