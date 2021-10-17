@@ -410,71 +410,86 @@ const Bot = (function() {
     }
 
     function minimax(board, depth, isMaxPlayer) {
-        if (board.getStatus(GameFlow.getPlayerOne(), GameFlow.getPlayerTwo()) != null) {
-            return board.getStatus(GameFlow.getPlayerOne(), GameFlow.getPlayerTwo());
+        let playerOne = GameFlow.getPlayerOne();
+        let playerTwo = GameFlow.getPlayerTwo();
+
+        let result = board.getStatus(playerOne, playerTwo);
+
+        if (result != null) {
+            return result;
         }
-    
-        let bestScore = isMaxPlayer? -Infinity : Infinity;
-    
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {   
-                if (!board.isPositionOcupied(i, j)) {
-                    if (isMaxPlayer) {
+
+        if (isMaxPlayer) {
+            let bestScore = -Infinity;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (!board.isPositionOcupied(i, j)) {
+                        board.populateBoard(i, j, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
                         let score = minimax(board, depth + 1, false);
-                        bestScore = max(score, bestScore);
-                    }
-                    else {
-                        let score = minimax(board, depth + 1, true);
-                        bestScore = min(score, bestScore);
+                        if (score > bestScore) {
+                            bestScore = score;
+                        }
+                        board.removeSymbol(i, j);
                     }
                 }
             }
+            
+            return bestScore;
         }
-    
-        return bestScore;
+        else {
+            let bestScore = Infinity;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (!board.isPositionOcupied(i, j)) {
+                        board.populateBoard(i, j, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
+                        let score = minimax(board, depth + 1, true);
+                        if (score < bestScore) {
+                            bestScore = score;
+                        }
+                        board.removeSymbol(i, j);
+                    }
+                }
+            }
+
+            return bestScore;
+        }
     }
     
-    const hardBotPlay = (gameBoard) => {
+    const hardBotPlay = (gameBoard) => { // Jugamos con O.
         let isMaxPlayer = GameFlow.getIsPlayerOneTurn(); // 'X' is playerOne so if it is playerOne's turn it's maximizing.
         let playerSymbol = isMaxPlayer? GameFlow.getPlayerOne().getSymbol() :  GameFlow.getPlayerTwo().getSymbol();
+
         let boardCopy = GameBoard();
+        boardCopy.setBoard(gameBoard.getCopy());
 
         let playerOne = GameFlow.getPlayerOne();
         let playerTwo = GameFlow.getPlayerTwo();
     
-        let bestScore = isMaxPlayer? -Infinity : Infinity;
+        //let bestScore = isMaxPlayer? -Infinity : Infinity;
+        let bestScore = -Infinity;
+
         let posI, posJ;
     
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {   
-                boardCopy.setBoard(gameBoard.getCopy());
-                if (!gameBoard.isPositionOcupied(i, j)) {
+                if (!boardCopy.isPositionOcupied(i, j)) {
                     boardCopy.populateBoard(i, j, playerSymbol);
     
-                    let score = minimax(boardCopy, 0, isMaxPlayer);
+                    let score = minimax(boardCopy, 0, false);
+
+                    boardCopy.removeSymbol(i, j);
                     
-                    if (isMaxPlayer) {
-                        if (score > bestScore) {
-                            bestScore = score;
-                            posI = i;
-                            posJ = j;
-                        }
-                    }
-                    else {
-                        if (score < bestScore) {
-                            bestScore = score;
-                            posI = i;
-                            posJ = j;
-                        }
+                    if (score > bestScore) {
+                        bestScore = score;
+                        posI = i;
+                        posJ = j;
                     }
                 }
             }
         }
 
-        gameBoard.populateBoard(posI, posJ, `${isMaxPlayer? playerOne.getSymbol() :
-            playerTwo.getSymbol()}`);
-        DisplayController.displayBoardElement(posI, posJ, `${isMaxPlayer? playerOne.getSymbol() :
-            playerTwo.getSymbol()}`);
+        gameBoard.populateBoard(posI, posJ, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
+        DisplayController.displayBoardElement(posI, posJ, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
     
         GameFlow.togglePlayerOneTurn();
         GameFlow.playGame();    
