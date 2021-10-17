@@ -1,26 +1,26 @@
-const GameBoard = (function() {
-    let _board = [['', '', ''], 
+const GameBoard = function() {
+    let board = [['', '', ''], 
                   ['', '', ''], 
                   ['', '', '']];
 
     const getBoard = () => {
-        return _board;
+        return board;
     }
 
     const resetBoard = () => {
-        _board = [['', '', ''], ['', '', ''], ['', '', '']];
+        board = [['', '', ''], ['', '', ''], ['', '', '']];
     }
 
     const populateBoard = function(i, j, symbol) {
-        _board[i][j] = symbol;
+        board[i][j] = symbol;
     }
 
-    const isBoardComplete = function() {
+    const isComplete = function() {
         let counter = 0;
 
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                if (_board[i][j] != '') counter++;
+                if (board[i][j] != '') counter++;
             }
         }
 
@@ -28,22 +28,104 @@ const GameBoard = (function() {
     }
 
     const isPositionOcupied = (i, j) => {
-        return (_board[i][j] != '') ? true : false;
+        return (board[i][j] != '') ? true : false;
+    }
+
+    function checkWinDiagonal(player) {
+        let counterMainDiag = 0;
+        let counterSecondDiag = 0;
+        let isThereWinner = false;
+
+        for (let i = 0; i < 3; i++) {
+            if (board[i][i] == player) counterMainDiag++;
+        }
+
+        for (i = 0; i < 3; i++) {
+            if (board[2-i][i] == player) counterSecondDiag++;
+        }
+        
+        if (counterMainDiag === 3 || counterSecondDiag === 3) {
+            isThereWinner = true;
+        }
+
+        return isThereWinner;
+    }
+
+    function checkWinHorizontal(player) {
+        let counter;
+        let isThereWinner = false;
+
+        for (let i = 0; i < 3; i++) {
+            counter = 0;
+            for (let j = 0; j < 3; j++) {
+                if (board[i][j] === player) counter++;
+            }
+
+            if (counter === 3) {
+                isThereWinner = true;
+                return isThereWinner;
+            }
+        }
+
+        return isThereWinner;
+    }
+
+    function checkWinVertical(player) {
+        let counter;
+        let isThereWinner = false;
+
+        for (let i = 0; i < 3; i++) {
+            counter = 0;
+            for (let j = 0; j < 3; j++) {
+                if (board[j][i] === player) counter++;
+            }
+
+            if (counter === 3) {
+                isThereWinner = true;
+                return isThereWinner;
+            }
+        }
+
+        return isThereWinner;
+    }
+
+    // Returns 0 if it's a tie, 1 if playerOne wins, -1 if playerTwo wins or null if there is no tie or winner.
+    const getStatus = (playerOne, playerTwo) => {
+        if (isComplete()) {
+            return 0;
+        }
+        else if (checkWinDiagonal(playerOne.getSymbol()) ||
+                checkWinVertical(playerOne.getSymbol()) || checkWinHorizontal(playerOne.getSymbol())) {
+            return 1;
+        }
+        else if (checkWinDiagonal(playerTwo.getSymbol()) ||
+                checkWinVertical(playerTwo.getSymbol()) || checkWinHorizontal(playerTwo.getSymbol())) {
+            return -1;
+        }
+        else {
+            return null;
+        }
+    }
+
+    const getCopy = () => {
+        return [...board];
     }
 
     return {
         getBoard,
         resetBoard,
         populateBoard,
-        isBoardComplete,
-        isPositionOcupied
+        isComplete,
+        isPositionOcupied,
+        getStatus,
+        getCopy
     }
-})()
+}
 
 const DisplayController = (function() {
     const boardContainer = document.querySelector('.board-container');
     const playerMenu = document.querySelector('.menu-wrapper');
-    const _tiles = document.querySelectorAll('.tile');
+    const tiles = document.querySelectorAll('.tile');
     const gameInfo = document.querySelector('.game-info');
 
     const playerOneSelectBtn = document.querySelectorAll('.player1');
@@ -60,11 +142,11 @@ const DisplayController = (function() {
     openPlayerSelec.addEventListener('click', openSelectionMenu);
 
     const disableTiles = () => {
-        _tiles.forEach(tile => tile.classList.add('disabled'));
+        tiles.forEach(tile => tile.classList.add('disabled'));
     }
 
     const enableTiles = () => {
-        _tiles.forEach(tile => tile.classList.remove('disabled'));  
+        tiles.forEach(tile => tile.classList.remove('disabled'));  
     }
 
     function openSelectionMenu() {
@@ -87,7 +169,7 @@ const DisplayController = (function() {
 
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                _tiles[counter].textContent = board[i][j];
+                tiles[counter].textContent = board[i][j];
 
                 counter++;
             }
@@ -95,9 +177,9 @@ const DisplayController = (function() {
     }
 
     const displayBoardElement = (i, j, symbol) => {
-        for (let k = 0; k < _tiles.length; k++) {
-            if (_tiles[k].id == i.toString()+j.toString()) {
-                _tiles[k].textContent = symbol;
+        for (let k = 0; k < tiles.length; k++) {
+            if (tiles[k].id == i.toString()+j.toString()) {
+                tiles[k].textContent = symbol;
             }
         } 
     }
@@ -146,23 +228,23 @@ const Player = (name, symbol) => {
 }
 
 const GameFlow = (function() {
+    let gameBoard = GameBoard();
+    let playerOne, playerTwo;
+    let isPlayerOneTurn = true;
     let currentPlayerSymbol;
-    let playerOne;
-    let playerTwo;
-    let playerOneTurn = true;
     let winner = '';
 
-    const _resetBoardBtn = document.querySelector('#restart');
-    _resetBoardBtn.addEventListener('click', restartGame);
+    const resetBoardBtn = document.querySelector('#restart');
+    resetBoardBtn.addEventListener('click', restartGame);
 
-    const _tiles = document.querySelectorAll('.tile');
+    const tiles = document.querySelectorAll('.tile');
 
     const startGameBtn = document.querySelector('#start');
     const playerOneSelectBtn = document.querySelectorAll('.player1');
     const playerTwoSelectBtn = document.querySelectorAll('.player2');
     startGameBtn.addEventListener('click', getPlayerSelection);
 
-    function getPlayerSelection() {
+    function getPlayerSelection() { // Calls playGame() twice??
         for (let i = 0; i < playerOneSelectBtn.length; i++) {
             if (playerOneSelectBtn[i].classList.contains('selected-player')) {
                 playerOne = Player(playerOneSelectBtn[i].id, 'X');
@@ -176,7 +258,7 @@ const GameFlow = (function() {
         }
 
         if (playerOne.getName() == 'human1' || playerTwo.getName() == 'human2') {
-            _tiles.forEach(tile => tile.addEventListener('click', getPlayerMovement));
+            tiles.forEach(tile => tile.addEventListener('click', getPlayerMovement));
             DisplayController.disableTiles();
         }
 
@@ -188,19 +270,24 @@ const GameFlow = (function() {
     }
 
     function playGame() {
-        DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
-        let pastPlayerSymbol = playerOneTurn? playerTwo.getSymbol() : playerOne.getSymbol();
+        let gameStatus = gameBoard.getStatus(playerOne, playerTwo);
 
-        if (checkWinDiagonal(pastPlayerSymbol) || checkWinHorizontal(pastPlayerSymbol) ||
-        checkWinVertical(pastPlayerSymbol)) winner = pastPlayerSymbol;
+        if (gameStatus == 1) {
+            winner = playerOne.getSymbol()
+        }
+        else if (gameStatus == -1) {
+            winner = playerTwo.getSymbol();
+        }
 
-        if (winner == '' && !GameBoard.isBoardComplete()) {
-            if (playerOneTurn) {
+        if (gameStatus == null) {
+            DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
+
+            if (isPlayerOneTurn) {
                 if (playerOne.getName() == 'human1') {
                     DisplayController.enableTiles();
                 }
                 else if (playerOne.getName() == 'boteasy1') {
-                    Bot.easyBotPlay();
+                    Bot.easyBotPlay(gameBoard);
                 }
 
             }
@@ -209,11 +296,11 @@ const GameFlow = (function() {
                     DisplayController.enableTiles();
                 }
                 else if (playerTwo.getName() == 'boteasy2') {
-                    Bot.easyBotPlay();
+                    Bot.easyBotPlay(gameBoard);
                 }
             }
     
-            currentPlayerSymbol = playerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol();
+            currentPlayerSymbol = isPlayerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol();
             DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
         }
     
@@ -221,23 +308,23 @@ const GameFlow = (function() {
             DisplayController.updateGameInfo(`${winner} won the game`);
             DisplayController.toggleGameInfoClass('show-winner', 'add');
         }
-        else if (GameBoard.isBoardComplete() && winner == '') {
+        else if (gameStatus == 0 && winner == '') {
             DisplayController.updateGameInfo('It´s a draw!');
             DisplayController.toggleGameInfoClass('show-tie', 'add');
         }
     }
 
     function restartGame() {
-        GameBoard.resetBoard();
-        DisplayController.displayAllBoard(GameBoard.getBoard());
+        gameBoard.resetBoard();
+        DisplayController.displayAllBoard(gameBoard.getBoard());
 
-        playerOneTurn = true;
+        isPlayerOneTurn = true;
         winner = '';
-        currentPlayerSymbol = 'X';
+        currentPlayerSymbol = playerOne.getSymbol();
 
         DisplayController.toggleGameInfoClass('show-tie', 'remove');
         DisplayController.toggleGameInfoClass('show-winner', 'remove');
-        DisplayController.updateGameInfo(`Player ${playerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol()
+        DisplayController.updateGameInfo(`Player ${isPlayerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol()
             }'s turn`);
 
         playGame();
@@ -246,79 +333,17 @@ const GameFlow = (function() {
     function getPlayerMovement(e) {
         let ij = e.target.id.split('');
 
-        if (!GameBoard.isPositionOcupied(ij[0], ij[1]) && winner == '') {
-            GameBoard.populateBoard(ij[0], ij[1], `${playerOneTurn? playerOne.getSymbol() :
+        if (!gameBoard.isPositionOcupied(ij[0], ij[1]) && winner == '') {
+            gameBoard.populateBoard(ij[0], ij[1], `${isPlayerOneTurn? playerOne.getSymbol() :
                 playerTwo.getSymbol()}`);
-            DisplayController.displayBoardElement(ij[0], ij[1], `${playerOneTurn? playerOne.getSymbol() :
+            DisplayController.displayBoardElement(ij[0], ij[1], `${isPlayerOneTurn? playerOne.getSymbol() :
                 playerTwo.getSymbol()}`);
 
-                playerOneTurn = !playerOneTurn;
+                isPlayerOneTurn = !isPlayerOneTurn;
                 DisplayController.disableTiles;
         }
 
         playGame();
-    }
-
-    function checkWinDiagonal(player) {
-        let counterMainDiag = 0;
-        let counterSecondDiag = 0;
-        let isThereWinner = false;
-
-        for (let i = 0; i < 3; i++) {
-            if (GameBoard.getBoard()[i][i] == player) counterMainDiag++;
-        }
-
-        for (i = 0; i < 3; i++) {
-            if (GameBoard.getBoard()[2-i][i] == player) counterSecondDiag++;
-        }
-        
-        if (counterMainDiag === 3 || counterSecondDiag === 3) {
-            isThereWinner = true;
-        }
-
-        return isThereWinner;
-    }
-
-    function checkWinHorizontal(player) {
-        let counter;
-        let isThereWinner = false;
-
-        for (let i = 0; i < 3; i++) {
-            counter = 0;
-            for (let j = 0; j < 3; j++) {
-                if (GameBoard.getBoard()[i][j] === player) counter++;
-            }
-
-            if (counter === 3) {
-                isThereWinner = true;
-                return isThereWinner;
-            }
-        }
-
-        return isThereWinner;
-    }
-
-    function checkWinVertical(player) {
-        let counter;
-        let isThereWinner = false;
-
-        for (let i = 0; i < 3; i++) {
-            counter = 0;
-            for (let j = 0; j < 3; j++) {
-                if (GameBoard.getBoard()[j][i] === player) counter++;
-            }
-
-            if (counter === 3) {
-                isThereWinner = true;
-                return isThereWinner;
-            }
-        }
-
-        return isThereWinner;
-    }
-
-    const getWinner = () => {
-        return winner;
     }
 
     const getPlayerOne = () => {
@@ -329,22 +354,22 @@ const GameFlow = (function() {
         return playerTwo;
     }
 
-    const getPlayerOneTurn = () => {
-        return playerOneTurn;
+    const getIsPlayerOneTurn = () => {
+        return isPlayerOneTurn;
     }
 
     const togglePlayerOneTurn = () => {
-        playerOneTurn = !playerOneTurn;
+        isPlayerOneTurn = !isPlayerOneTurn;
     }
 
-    return {restartGame, getWinner, getPlayerOne, getPlayerTwo, getPlayerOneTurn, playGame, togglePlayerOneTurn};
+    return {restartGame, getPlayerOne, getPlayerTwo, getIsPlayerOneTurn, playGame, togglePlayerOneTurn};
 })()
 
 const Bot = (function() {
-    const easyBotPlay = () => {
+    const easyBotPlay = (gameBoard) => {
         let playerOne = GameFlow.getPlayerOne();
         let playerTwo = GameFlow.getPlayerTwo();
-        let playerOneTurn = GameFlow.getPlayerOneTurn();
+        let isPlayerOneTurn = GameFlow.getIsPlayerOneTurn();
         let isPosValid = false;
         let posI;
         let posJ;
@@ -353,20 +378,18 @@ const Bot = (function() {
             posI = Math.floor(Math.random() * 3);
             posJ = Math.floor(Math.random() * 3);
 
-            if (!GameBoard.isPositionOcupied(posI, posJ)) {
+            if (!gameBoard.isPositionOcupied(posI, posJ)) {
                 isPosValid = true;
             }
         }
 
-        if (GameFlow.getWinner() == '') {
-            GameBoard.populateBoard(posI, posJ, `${playerOneTurn? playerOne.getSymbol() :
-                playerTwo.getSymbol()}`);
-            DisplayController.displayBoardElement(posI, posJ, `${playerOneTurn? playerOne.getSymbol() :
-                playerTwo.getSymbol()}`);
+        gameBoard.populateBoard(posI, posJ, `${isPlayerOneTurn? playerOne.getSymbol() :
+            playerTwo.getSymbol()}`);
+        DisplayController.displayBoardElement(posI, posJ, `${isPlayerOneTurn? playerOne.getSymbol() :
+            playerTwo.getSymbol()}`);
 
-            GameFlow.togglePlayerOneTurn()
-            GameFlow.playGame();
-        }
+        GameFlow.togglePlayerOneTurn()
+        GameFlow.playGame();
     }
 
     return {easyBotPlay}
