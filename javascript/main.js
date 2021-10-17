@@ -111,6 +111,14 @@ const GameBoard = function() {
         return [...board];
     }
 
+    const setBoard = (newBoard) => {
+        board = newBoard;
+    }
+
+    const removeSymbol = (i, j) => {
+        board[i][j] = '';
+    }
+
     return {
         getBoard,
         resetBoard,
@@ -118,7 +126,9 @@ const GameBoard = function() {
         isComplete,
         isPositionOcupied,
         getStatus,
-        getCopy
+        getCopy,
+        setBoard,
+        removeSymbol
     }
 }
 
@@ -278,6 +288,9 @@ const GameFlow = (function() {
                 else if (playerOne.getName() == 'boteasy1') {
                     Bot.easyBotPlay(gameBoard);
                 }
+                else if (playerOne.getName() == 'bothard1') {
+                    Bot.hardBotPlay(gameBoard);
+                }
             }
             else {
                 if (playerTwo.getName() == 'human2') {
@@ -285,6 +298,9 @@ const GameFlow = (function() {
                 }
                 else if (playerTwo.getName() == 'boteasy2') {
                     Bot.easyBotPlay(gameBoard);
+                }
+                else if (playerTwo.getName() == 'bothard2') {
+                    Bot.hardBotPlay(gameBoard);
                 }
             }
         }
@@ -382,5 +398,78 @@ const Bot = (function() {
         GameFlow.playGame();
     }
 
-    return {easyBotPlay}
+    function minimax(board, depth, isMaxPlayer) {
+        if (board.getStatus !== null) {
+            return board.getStatus(GameFlow.getPlayerOne(), GameFlow.getPlayerTwo());
+        }
+    
+        let bestScore = isMaxPlayer? -Infinity : Infinity;
+    
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {   
+                if (!gameBoard.isPositionOcupied(i, j)) {
+                    if (isMaxPlayer) {
+                        let score = minimax(board, depth + 1, false);
+                        bestScore = max(score, bestScore);
+                    }
+                    else {
+                        let score = minimax(board, depth + 1, true);
+                        bestScore = min(score, bestScore);
+                    }
+                }
+            }
+        }
+    
+        return bestScore;
+    }
+    
+    const hardBotPlay = (gameBoard) => {
+        let isMaxPlayer = GameFlow.getIsPlayerOneTurn(); // 'X' is playerOne so if it is playerOne's turn it's maximizing.
+        let playerSymbol = isMaxPlayer? GameFlow.getPlayerOne().getSymbol() :  GameFlow.getPlayerTwo().getSymbol();
+        let boardCopy = GameBoard();
+
+        let playerOne = GameFlow.getPlayerOne();
+        let playerTwo = GameFlow.getPlayerTwo();
+    
+        let bestScore = isMaxPlayer? -Infinity : Infinity;
+        let posI, posJ;
+    
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {   
+                boardCopy.setBoard(gameBoard.getCopy());
+                if (!gameBoard.isPositionOcupied(i, j)) {
+                    boardCopy.populateBoard(i, j, playerSymbol);
+    
+                    let score = minimax(boardCopy, 0, isMaxPlayer);
+                    
+                    if (isMaxPlayer) {
+                        if (score > bestScore) {
+                            bestScore = score;
+                            posI = i;
+                            posJ = j;
+                        }
+                    }
+                    else {
+                        if (score < bestScore) {
+                            bestScore = score;
+                            posI = i;
+                            posJ = j;
+                        }
+                    }
+                    
+                    boardCopy.removeSymbol(i, j);
+                }
+            }
+        }
+
+        gameBoard.populateBoard(posI, posJ, `${isMaxPlayer? playerOne.getSymbol() :
+            playerTwo.getSymbol()}`);
+        DisplayController.displayBoardElement(posI, posJ, `${isMaxPlayer? playerOne.getSymbol() :
+            playerTwo.getSymbol()}`);
+    
+        GameFlow.togglePlayerOneTurn();
+        GameFlow.playGame();    
+    }
+
+    return {easyBotPlay, hardBotPlay};
 })()
