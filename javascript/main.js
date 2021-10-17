@@ -91,16 +91,16 @@ const GameBoard = function() {
 
     // Returns 0 if it's a tie, 1 if playerOne wins, -1 if playerTwo wins or null if there is no tie or winner.
     const getStatus = (playerOne, playerTwo) => {
-        if (isComplete()) {
-            return 0;
-        }
-        else if (checkWinDiagonal(playerOne.getSymbol()) ||
+        if (checkWinDiagonal(playerOne.getSymbol()) ||
                 checkWinVertical(playerOne.getSymbol()) || checkWinHorizontal(playerOne.getSymbol())) {
             return 1;
         }
         else if (checkWinDiagonal(playerTwo.getSymbol()) ||
                 checkWinVertical(playerTwo.getSymbol()) || checkWinHorizontal(playerTwo.getSymbol())) {
             return -1;
+        }
+        else if (isComplete()) {
+            return 0;
         }
         else {
             return null;
@@ -244,7 +244,7 @@ const GameFlow = (function() {
     const playerTwoSelectBtn = document.querySelectorAll('.player2');
     startGameBtn.addEventListener('click', getPlayerSelection);
 
-    function getPlayerSelection() { // Calls playGame() twice??
+    function getPlayerSelection() {
         for (let i = 0; i < playerOneSelectBtn.length; i++) {
             if (playerOneSelectBtn[i].classList.contains('selected-player')) {
                 playerOne = Player(playerOneSelectBtn[i].id, 'X');
@@ -266,7 +266,6 @@ const GameFlow = (function() {
 
         DisplayController.togglePlayerMenu();
         restartGame();
-        playGame();
     }
 
     function playGame() {
