@@ -271,12 +271,8 @@ const GameFlow = (function() {
     function playGame() {
         let gameStatus = gameBoard.getStatus(playerOne, playerTwo);
 
-        if (gameStatus == 1) {
-            winner = playerOne.getSymbol()
-        }
-        else if (gameStatus == -1) {
-            winner = playerTwo.getSymbol();
-        }
+        currentPlayerSymbol = isPlayerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol();
+        DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
 
         if (gameStatus == null) {
             if (isPlayerOneTurn) {
@@ -286,7 +282,6 @@ const GameFlow = (function() {
                 else if (playerOne.getName() == 'boteasy1') {
                     Bot.easyBotPlay(gameBoard);
                 }
-
             }
             else {
                 if (playerTwo.getName() == 'human2') {
@@ -296,12 +291,12 @@ const GameFlow = (function() {
                     Bot.easyBotPlay(gameBoard);
                 }
             }
-    
-            currentPlayerSymbol = isPlayerOneTurn? playerOne.getSymbol(): playerTwo.getSymbol();
-
-            if (gameBoard.getStatus(playerOne, playerTwo) != 0) {
-                DisplayController.updateGameInfo(`Player ${currentPlayerSymbol}'s turn`);
-            }
+        }
+        else if (gameStatus == 1) {
+            winner = playerOne.getSymbol()
+        }
+        else if (gameStatus == -1) {
+            winner = playerTwo.getSymbol();
         }
     
         if (winner != '') {
