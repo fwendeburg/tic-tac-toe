@@ -108,7 +108,18 @@ const GameBoard = function() {
     }
 
     const getCopy = () => {
-        return [...board];
+        let newBoard = [];
+        let newRow;
+
+        board.forEach(row => {
+            newRow = [];
+
+            row.forEach(place => newRow.push(place));
+
+            newBoard.push(newRow);
+        });
+
+        return newBoard;
     }
 
     const setBoard = (newBoard) => {
@@ -399,7 +410,7 @@ const Bot = (function() {
     }
 
     function minimax(board, depth, isMaxPlayer) {
-        if (board.getStatus !== null) {
+        if (board.getStatus(GameFlow.getPlayerOne(), GameFlow.getPlayerTwo()) != null) {
             return board.getStatus(GameFlow.getPlayerOne(), GameFlow.getPlayerTwo());
         }
     
