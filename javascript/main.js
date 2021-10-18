@@ -419,40 +419,32 @@ const Bot = (function() {
             return result;
         }
 
-        if (isMaxPlayer) {
-            let bestScore = -Infinity;
-            for (let i = 0; i < 3; i++) {
-                for (let j = 0; j < 3; j++) {
-                    if (!board.isPositionOcupied(i, j)) {
-                        board.populateBoard(i, j, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
+        let bestScore = isMaxPlayer? -Infinity : Infinity;
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (!board.isPositionOcupied(i, j)) {
+                    board.populateBoard(i, j, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
+
+                    if (isMaxPlayer) {
                         let score = minimax(board, depth + 1, false);
                         if (score > bestScore) {
                             bestScore = score;
                         }
-                        board.removeSymbol(i, j);
                     }
-                }
-            }
-            
-            return bestScore;
-        }
-        else {
-            let bestScore = Infinity;
-            for (let i = 0; i < 3; i++) {
-                for (let j = 0; j < 3; j++) {
-                    if (!board.isPositionOcupied(i, j)) {
-                        board.populateBoard(i, j, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
+                    else {
                         let score = minimax(board, depth + 1, true);
                         if (score < bestScore) {
                             bestScore = score;
                         }
-                        board.removeSymbol(i, j);
                     }
+
+                    board.removeSymbol(i, j);
                 }
             }
-
-            return bestScore;
         }
+        
+        return bestScore;
     }
     
     const hardBotPlay = (gameBoard) => {
