@@ -448,14 +448,11 @@ const Bot = (function() {
     }
     
     const hardBotPlay = (gameBoard) => {
-        let isMaxPlayer = GameFlow.getIsPlayerOneTurn(); // 'X' is playerOne so if it is playerOne's turn it's maximizing.
+        let isMaxPlayer = GameFlow.getIsPlayerOneTurn(); // X (playerOne) maximizes, O (playerTwo) minimizes.
         let playerSymbol = isMaxPlayer? GameFlow.getPlayerOne().getSymbol() :  GameFlow.getPlayerTwo().getSymbol();
 
         let boardCopy = GameBoard();
         boardCopy.setBoard(gameBoard.getCopy());
-
-        let playerOne = GameFlow.getPlayerOne();
-        let playerTwo = GameFlow.getPlayerTwo();
     
         let bestScore = isMaxPlayer? -Infinity : Infinity;
         let posI, posJ;
@@ -485,8 +482,8 @@ const Bot = (function() {
             }
         }
 
-        gameBoard.populateBoard(posI, posJ, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
-        DisplayController.displayBoardElement(posI, posJ, `${isMaxPlayer? playerOne.getSymbol() : playerTwo.getSymbol()}`);
+        gameBoard.populateBoard(posI, posJ, `${playerSymbol}`);
+        DisplayController.displayBoardElement(posI, posJ, `${playerSymbol}`);
     
         GameFlow.togglePlayerOneTurn();
         GameFlow.playGame();    
